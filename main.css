@@ -1,0 +1,2505 @@
+/*
+  On 20250303, due to font files inconsistencies, we sourced the updated fonts from here:
+  https://github.com/alsacreations/webfonts
+  
+*/
+@font-face {
+  font-family: "CodeFont";
+  src:
+    url("media/Roboto-Mono-Regular-webfont.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "CodeFont";
+  src:
+    url("media/Roboto-Mono-Bold-webfont.woff") format("woff");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "OpenSans";
+  src: url("media/opensans-regular.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "OpenSans";
+  src: url("media/opensans-bold.woff2") format("woff2");
+  font-weight: bold;
+  font-style: normal;
+}
+
+* {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  font-family: "OpenSans", sans-serif;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #4285F4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 320ms ease;
+}
+.splash.splash-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.splash-logo {
+  width: min(70vw, 640px);
+  height: auto;
+  max-height: 60vh;
+  animation: splash-logo-in 600ms ease-out both,
+             splash-logo-pulse 2000ms ease-in-out 600ms infinite;
+}
+
+@keyframes splash-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes splash-logo-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 0.92;
+  }
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* Global button reset for the main Choo IDE only.
+   Scoped with body:not(.admin-active) so the React + Tailwind admin route
+   (#/admin/editor, marked by body.admin-active in admin-entry.jsx) keeps
+   Tailwind's preflight defaults — otherwise these 45px square / column-flex
+   rules force every admin button into a tiny vertical box.
+
+   The body-scope is wrapped in :where() so it contributes 0 specificity.
+   Without that, `body:not(.admin-active) button` would resolve to (0,1,1)
+   and override class-based button rules like `.topic-card` (0,1,0) — which
+   forced every reference-panel card into a 45×45 column-flex tile. */
+:where(body:not(.admin-active)) button {
+  display: flex;
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+:where(body:not(.admin-active)) button.small {
+  width: 28px;
+  height: 28px;
+  border-radius: 28px;
+}
+:where(body:not(.admin-active)) button.square {
+  border-radius: 8px;
+}
+:where(body:not(.admin-active)) button.inverted:hover,
+:where(body:not(.admin-active)) button.inverted.active {
+  background: rgba(0, 129, 132, 0.8) !important;
+}
+:where(body:not(.admin-active)) button.inverted {
+  background: rgba(0, 129, 132, 1) !important;
+}
+
+:where(body:not(.admin-active)) button[disabled],
+:where(body:not(.admin-active)) button[disabled]:hover{
+  cursor: default;
+  opacity: 0.5;
+}
+
+:where(body:not(.admin-active)) button:not([disabled]):hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+}
+
+:where(body:not(.admin-active)) button.active {
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+}
+
+:where(body:not(.admin-active)) button .icon {
+  width: 80%;
+  height: 80%;
+}
+:where(body:not(.admin-active)) button.small .icon {
+  width: 75%;
+  height: 75%;
+}
+
+
+.button {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  align-items: center;
+  gap: 2px;
+  width: auto
+}
+.button.first{
+  min-width:80px;
+}
+.button .label {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: "OpenSans", sans-serif;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.button .label.active {
+  color: rgba(255, 255, 255, .9);
+}
+.button .tooltip {
+  opacity: 0;
+  position: absolute;
+  top: 120%;
+  left: 0;
+  font-size: 10px;
+  background: #fff;
+  padding: 8px;
+  z-index: 99;
+  transition: all 0.1s;
+  transition-delay: 0.0s;
+  pointer-events: none;
+  text-align: center;
+  transform: translateY(-10px);
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+              0px 3px 1px -2px rgba(0, 0, 0, 0.12),
+              0px 1px 5px 0px rgba(0, 0, 0, 0.20);
+}
+
+.button:focus .tooltip,
+.button:hover .tooltip {
+  opacity: 1;
+  transform: translateY(0px);
+  transition: all 0.25s;
+  transition-delay: 0.5s;
+}
+
+#app {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  font-family: "CodeFont", monospace;
+  overflow: hidden;
+}
+
+/* Phase 4 menu bar + view wrapper. Stacks the menu bar above the active
+   view in column flex without disturbing the centered "select folder"
+   first-run screen (which doesn't use this wrapper). */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.app-shell > .app-menu-bar { flex: 0 0 auto; }
+.app-shell > #navigation-bar { flex: 0 0 auto; }
+.app-shell > .working-area { flex: 1 1 auto; min-height: 0; }
+.app-shell > .app-main { flex: 1 1 auto; min-height: 0; }
+.app-shell > .app-footer { flex: 0 0 10px; }
+
+.app-footer {
+  height: 10px;
+  width: 100%;
+  background: #E8EAEC;
+}
+
+/* Permanent left sidebar layout (replaces old view toggle) */
+.app-main {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Activity bar — VSCode-style 80px vertical strip on the far left.
+   Lives directly inside .app-main, so it never overlaps anything and
+   always has a fixed-width column reserved for it. */
+.activity-bar {
+  flex: 0 0 80px;
+  width: 80px;
+  background: #4285F4;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 11;
+}
+.activity-group { display: flex; flex-direction: column; }
+/* Horizontal separator between activity-bar groups. Matches python-ide's
+   ActivityBar Divider: 1px tall, 12px horizontal / 4px vertical margin,
+   30% white over the blue bar. */
+.activity-divider {
+  height: 1px;
+  margin: 4px 12px;
+  background: rgba(255, 255, 255, 0.3);
+}
+/* Global `button { width: 45px; height: 45px; padding: 0 }` rule lives
+   higher up in this file (toolbar buttons depend on it). Every custom
+   button below has to opt out by specifying width/height/padding
+   explicitly, otherwise text gets squeezed into a 45px square and
+   wraps a character per line. */
+.activity-item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  width: 100%;
+  height: 80px;
+  min-width: 0;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.activity-item:hover,
+button.activity-item:not([disabled]):hover {
+  background: transparent;
+  border-radius: 0;
+}
+.activity-item.is-active:hover,
+button.activity-item.is-active:not([disabled]):hover {
+  background: #f8fafc;
+}
+.activity-item.is-active {
+  background: #f8fafc;
+  color: #4285F4;
+}
+.activity-icon { font-size: 24px; line-height: 1; }
+/* SVG variant of activity-icon — 24×24 box, fill follows the button's
+   `color` via fill="currentColor" so it flips with active/inactive state. */
+.activity-svg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+.activity-svg-icon > svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+.activity-label {
+  font-size: 11px;
+  line-height: 1.1;
+  opacity: 0.9;
+  text-align: center;
+}
+.activity-item.is-active .activity-label { opacity: 1; font-weight: 600; }
+
+/* Topic-list panel (reference content rendered inside the sidebar).
+   Layout/colors mirror the python-ide React TopicPreview/TopicListShell
+   so that the same content reads identically across both apps:
+     ink   #181d26   body  #333840   muted #41454d
+     link  #1b61c9   hairline #dddddd  surface-soft #f8fafc
+     code-bg #e6f0fa  toc red-50 #fef2f2 / red-200 #fecaca
+     notice amber-50 #fffbeb / amber-300 #fcd34d / amber-900 #78350f */
+.topic-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  background: #fff;
+}
+.topic-detail {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f8fafc;
+  border-right: 1px solid #dddddd;
+}
+/* Card-style topic row — colored icon tile + title/desc + chevron.
+   The global `button` rule earlier in this file forces flex-direction
+   to column and justify-content to center; we override both back to a
+   horizontal row so the icon/text/arrow lay out left-to-right. */
+.topic-card {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  border-bottom: 1px solid #dddddd;
+  transition: background 0.12s ease;
+}
+.topic-card:last-child { border-bottom: 0; }
+.topic-list .topic-card:hover { background: rgba(224, 226, 230, 0.4); border-radius: 0; }
+.topic-card-icon {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  background: #bfdbfe;
+  color: #181d26;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.topic-card-icon .material-symbols-outlined {
+  font-size: 32px;
+  font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.topic-card-text {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.topic-card-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #181d26;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topic-card-desc {
+  font-size: 12px;
+  color: #41454d;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topic-card-arrow {
+  flex: 0 0 auto;
+  color: #1b61c9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease;
+}
+.topic-list .topic-card:hover .topic-card-arrow { transform: translateX(2px); }
+.topic-card-arrow .material-symbols-outlined { font-size: 20px; }
+
+/* Detail view — back link bar above the icon/title row, then a
+   scrollable body containing the TOC, optional notice, and entries. */
+.topic-detail-backbar {
+  flex: 0 0 auto;
+  padding: 12px 16px 4px;
+  background: #f8fafc;
+}
+.topic-detail-back-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: #1b61c9;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  height: auto;
+  width: auto;
+}
+.topic-detail-backbar .topic-detail-back-link:hover {
+  text-decoration: underline;
+  background: transparent;
+  border-radius: 0;
+}
+.topic-detail-back-link .material-symbols-outlined {
+  font-size: 18px;
+  margin-left: -4px;
+}
+.topic-detail-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 16px 10px;
+  border-bottom: 1px solid #dddddd;
+  background: #f8fafc;
+  position: static;
+}
+.topic-detail-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  background: #bfdbfe;
+  color: #181d26;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.topic-detail-icon .material-symbols-outlined {
+  font-size: 28px;
+  font-variation-settings: 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.topic-detail-text {
+  min-width: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.topic-detail-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #181d26;
+  line-height: 1.2;
+}
+.topic-detail-desc {
+  margin: 0;
+  font-size: 13px;
+  color: #41454d;
+  line-height: 1.45;
+}
+.topic-detail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+/* TOC (목차) — red-tinted box with a flat list of entry names. */
+.topic-toc-wrapper {
+  padding: 12px 16px;
+}
+.topic-toc {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  border-radius: 6px;
+  padding: 12px;
+}
+.topic-toc-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #181d26;
+  margin-bottom: 8px;
+}
+.topic-toc-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.topic-toc-item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: #333840;
+  padding: 2px 6px;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+.topic-toc .topic-toc-item:hover {
+  background: #fee2e2;
+  color: #1b61c9;
+  border-radius: 4px;
+}
+.topic-toc-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: #fecaca;
+}
+
+/* Notice / external link rows under the TOC. */
+.topic-notice {
+  margin: 12px 16px 4px;
+  padding: 8px 12px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.topic-notice-icon {
+  font-size: 18px;
+  color: #d97706;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.topic-notice-text {
+  margin: 0;
+  font-size: 13px;
+  color: #78350f;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.topic-external {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dddddd;
+}
+.topic-external-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #1b61c9;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.12s ease;
+}
+.topic-external-link:hover { opacity: 0.9; }
+.topic-external-link .material-symbols-outlined { font-size: 18px; }
+
+/* Per-entry block — title row + summary, optional collapsible
+   details (soft-gray bg) and a list of example code blocks. */
+.entry {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dddddd;
+  background: #ffffff;
+}
+.entry-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+.entry-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #181d26;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.entry-more {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  flex: 0 0 auto;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  color: #1b61c9;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+}
+.entry .entry-more:hover {
+  text-decoration: underline;
+  background: transparent;
+  border-radius: 0;
+}
+.entry-more .material-symbols-outlined { font-size: 16px; }
+
+.entry-summary {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #333840;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.entry-extension {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border: 1px solid #86efac;
+  background: #f0fdf4;
+  border-radius: 6px;
+  color: #14532d;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.entry-notice {
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.entry-notice-warning {
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  color: #78350f;
+}
+.entry-notice-info {
+  border: 1px solid #86efac;
+  background: #f0fdf4;
+  color: #14532d;
+}
+.entry-notice-error {
+  border: 1px solid #fca5a5;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+.entry-notice-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.entry-notice-warning .entry-notice-icon { color: #d97706; }
+.entry-notice-info .entry-notice-icon { color: #15803d; }
+.entry-notice-error .entry-notice-icon { color: #dc2626; }
+.entry-notice-text {
+  font-size: 12px;
+  line-height: 1.55;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: pre-wrap;
+}
+
+.entry-details-box {
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 12px;
+  color: #41454d;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.entry-table-wrap {
+  margin-bottom: 8px;
+  overflow-x: auto;
+}
+.entry-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.entry-table thead tr { background: #f8fafc; }
+.entry-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #181d26;
+  padding: 4px 8px;
+  border: 1px solid #dddddd;
+}
+.entry-table td {
+  padding: 4px 8px;
+  border: 1px solid #dddddd;
+  color: #333840;
+  vertical-align: top;
+}
+.entry-table-first {
+  font-family: 'JetBrains Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  color: #181d26;
+  white-space: nowrap;
+}
+
+.entry-example { margin-bottom: 8px; }
+.entry-example:last-child { margin-bottom: 0; }
+.entry-example-desc {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #333840;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.entry-code {
+  position: relative;
+  padding: 8px 8px 8px 28px;
+  border: 1px solid rgba(27, 97, 201, 0.15);
+  border-radius: 6px;
+  background: #e6f0fa;
+  overflow-x: auto;
+  cursor: grab;
+  font-family: 'JetBrains Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+.entry-code:active { cursor: grabbing; }
+.entry-code:hover { filter: brightness(0.96); }
+.entry-code-grip {
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: rgba(65, 69, 77, 0.7);
+  pointer-events: none;
+  user-select: none;
+}
+.entry-code-pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  color: #181d26;
+  white-space: pre;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.55;
+}
+.entry-code-pre code {
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.topic-loading,
+.topic-empty,
+.topic-error { padding: 24px; color: #41454d; font-size: 13px; }
+.topic-error { color: #aa2d00; }
+
+/* Snippet drop indicator: shown over the editor while dragging a code
+   block from the topic-detail panel. Top bar marks the exact insertion
+   line; the ghost <pre> beneath previews what will be inserted. */
+.snippet-drop-zone {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(27, 97, 201, 0.06);
+  overflow: hidden;
+}
+.snippet-drop-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1b61c9;
+  box-shadow: 0 0 0 1px rgba(27, 97, 201, 0.25);
+}
+.snippet-drop-ghost {
+  margin: 0;
+  padding: 4px 0 0 64px;
+  font-family: 'JetBrains Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+  color: rgba(27, 97, 201, 0.7);
+  white-space: pre;
+}
+
+/* Tutorial-editor (admin) — full-screen 3-column layout, replaces
+   the main app shell when /#/admin is the active route. */
+.admin-app {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+  color: #181d26;
+  font-family: 'OpenSans', system-ui, sans-serif;
+  z-index: 100;
+}
+.admin-toolbar {
+  flex: 0 0 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  background: #fff;
+  border-bottom: 1px solid #e0e2e6;
+}
+.admin-toolbar h1 { font-size: 16px; margin: 0; font-weight: 700; }
+.admin-toolbar .spacer { flex: 1; }
+.admin-toolbar select,
+.admin-toolbar button {
+  font: inherit;
+  padding: 6px 12px;
+  width: auto;
+  height: auto;
+  border: 1px solid #d0d3d9;
+  border-radius: 4px;
+  background: #fff;
+  color: #181d26;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.admin-toolbar button.primary { background: #1967d2; color: #fff; border-color: #1967d2; }
+.admin-toolbar button.primary:disabled { opacity: 0.55; cursor: default; }
+.admin-toolbar .status { font-size: 12px; color: #5b6470; }
+.admin-toolbar .status.dirty { color: #aa2d00; font-weight: 600; }
+.admin-toolbar .status.error { color: #aa2d00; font-weight: 600; }
+
+.admin-grid {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr 360px;
+  gap: 0;
+  min-height: 0;
+}
+.admin-col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+  background: #fff;
+  border-right: 1px solid #e0e2e6;
+}
+.admin-col:last-child { border-right: 0; border-left: 1px solid #e0e2e6; }
+.admin-col h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5b6470;
+  padding: 12px 14px 8px;
+  margin: 0;
+}
+.admin-topic-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+  cursor: pointer;
+  border: 0;
+  width: 100%;
+  height: auto;
+  box-sizing: border-box;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+}
+.admin-topic-row:hover { background: #f4f7ff; }
+.admin-topic-row.is-selected { background: #e8f0fe; }
+.admin-topic-row .title { flex: 1; font-weight: 600; font-size: 13px; }
+.admin-topic-row .actions { display: flex; gap: 2px; }
+.admin-topic-row .actions button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  color: #5b6470;
+}
+.admin-topic-row .actions button:hover { background: #d6e3ff; color: #1967d2; }
+.admin-add {
+  margin: 8px 12px 16px;
+  padding: 6px 10px;
+  width: auto;
+  height: auto;
+  background: #e8f0fe;
+  color: #1967d2;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-form { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.admin-field { display: flex; flex-direction: column; gap: 4px; }
+.admin-field label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6470; }
+.admin-field input,
+.admin-field textarea {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #d0d3d9;
+  border-radius: 3px;
+  background: #fff;
+  color: #181d26;
+  resize: vertical;
+}
+.admin-field textarea { min-height: 60px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+.admin-field textarea.code { background: #0d1b2a; color: #d6e3ff; border-color: #0d1b2a; }
+
+.admin-entry {
+  border: 1px solid #e0e2e6;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #fff;
+}
+.admin-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.admin-entry-header .title { flex: 1; font-weight: 700; font-size: 13px; }
+.admin-entry-header button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 3px;
+  color: #5b6470;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-entry-header button:hover { background: #f0f0f0; color: #aa2d00; }
+
+.admin-example {
+  border-top: 1px dashed #e0e2e6;
+  padding-top: 8px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-preview {
+  padding: 16px;
+  font-size: 13px;
+  background: #fff;
+}
+.admin-preview h3 { margin: 0 0 6px; font-size: 14px; }
+.admin-preview .preview-block { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+
+.app-sidebar {
+  position: relative;
+  /* Width is provided by an inline style from views/components/sidebar.js
+     (state.sidebarWidth, clamped 180–600). The values below are fallbacks
+     for the brief moment before that style is applied. */
+  flex: 0 0 400px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  border-right: 1px solid #ddd;
+  transition: flex-basis 0.22s ease, width 0.22s ease;
+  overflow: visible;
+  min-height: 0;
+}
+/* Disable the collapse transition while the user is dragging the resizer —
+   otherwise every mousemove fight the easing curve and the drag feels laggy. */
+body.is-resizing-sidebar .app-sidebar { transition: none; }
+.app-sidebar.collapsed {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  border-right-width: 0;
+}
+
+/* Vertical drag handle that sits between the sidebar and the editor area.
+   4px wide hit target; the inner ::before line is what the user sees so
+   the visual stays slim while the click target is forgiving. */
+.sidebar-resizer {
+  position: relative;
+  flex: 0 0 4px;
+  width: 4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: 4;
+  user-select: none;
+}
+.sidebar-resizer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 1px;
+  width: 1px;
+  background: #ddd;
+  transition: background 0.12s ease, width 0.12s ease, left 0.12s ease;
+}
+.sidebar-resizer:hover::before,
+body.is-resizing-sidebar .sidebar-resizer::before {
+  background: #4285F4;
+  width: 2px;
+  left: 1px;
+}
+.sidebar-resizer.is-hidden {
+  display: none;
+}
+body.is-resizing-sidebar {
+  cursor: col-resize;
+  user-select: none;
+}
+.app-sidebar.collapsed > :not(.sidebar-toggle) {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+/* Settings panel — rendered inside the left sidebar via the activity-bar
+   settings tab. Matches the topic-list panel layout (sticky header + a
+   scrollable body) so it slots in alongside the other sidebar panels. */
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  overflow: hidden;
+}
+.settings-panel-header {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  color: #111;
+  flex: 0 0 auto;
+}
+.settings-panel-body {
+  flex: 1 1 auto;
+  padding: 14px 18px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.settings-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.settings-card-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+}
+.settings-card-body {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.settings-select {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+.settings-apply {
+  width: auto;
+  height: auto;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #4285F4;
+  color: #fff;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+button.settings-apply:hover { background: #3367d6; border-radius: 4px; }
+
+.settings-shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.settings-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #333;
+}
+.settings-shortcut-key {
+  display: inline-block;
+  min-width: 56px;
+  padding: 2px 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+.settings-shortcut-desc {
+  color: #555;
+}
+/* When collapsed the sidebar itself is 0px wide. Pin the toggle inside the
+   viewport (left edge) so it remains clickable to re-expand. */
+.app-sidebar.collapsed .sidebar-toggle {
+  right: auto;
+  left: 4px;
+}
+
+.sidebar-logo {
+  flex: 0 0 auto;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #fff;
+}
+.sidebar-logo img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+.sidebar-files {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.sidebar-toggle {
+  position: absolute;
+  top: 50%;
+  right: -14px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  z-index: 5;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.sidebar-toggle:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+.sidebar-toggle .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.working-area {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+#navigation-bar {
+  display: flex;
+  width: 100%;
+  background: #4285F4;
+  align-items: center;
+}
+
+/* Logo slot fills the same width as the sidebar (400px) so the toolbar
+   buttons always start at the editor's left edge below. When the sidebar
+   collapses we shrink the logo slot to match, keeping the alignment. */
+#app-logo {
+  flex: 0 0 400px;
+  width: 400px;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+  transition: flex-basis 0.22s ease, width 0.22s ease, padding 0.22s ease;
+}
+#navigation-bar.sidebar-collapsed #app-logo {
+  flex: 0 0 0;
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+#app-logo img {
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+#toolbar {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 10px 6px 10px;
+  align-items: center;
+  gap: 16px;
+  align-self: stretch;
+  background: #4285F4;
+}
+
+/* Toolbar icons are dark SVGs on a blue background — force them to white.
+   Scoped to #toolbar so sidebar / file-action icons stay dark on light bg. */
+#toolbar button .icon {
+  filter: brightness(0) invert(1);
+}
+
+#toolbar .button {
+  padding-top: 5px;
+}
+
+#toolbar .toolbar-version {
+  margin-left: auto;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.9;
+  user-select: none;
+}
+
+#toolbar .button:last-child {
+  margin-right: -4px;
+}
+
+#toolbar .button:nth-last-child(-n+2) button {
+  width: 31.5px;
+  height: 31.5px;
+}
+#toolbar .button:nth-last-child(-n+2) .label {
+  display: none;
+}
+
+#app-views {
+  display: flex;
+  padding: 16px 10px 10px 10px;
+  width: 120px;
+  /* gap: 16px; */
+}
+
+#app-views .button{
+  flex-grow: 1;
+  width: 100%;
+}
+
+#app-views .button button{
+  width: 100%
+}
+
+#app-views .button .label{
+  
+}
+#app-views .button .label.selected{
+  font-weight: bold;
+}
+
+#app-views div:first-child button{
+  border-radius: 8px 0px 0px 8px;
+  
+}
+#app-views div:last-child button{
+  border-radius: 0px 8px 8px 0px;
+  
+}
+
+.separator {
+  height: 100%;
+  min-width: 1px;
+  flex-basis: fit-content;
+  background: #fff;
+  opacity: 0.7;
+  position: relative;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  height: 65%;
+}
+
+#tabs {
+  display: flex;
+  padding: 10px 10px 0px 60px;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  background: #ECF1F1;
+  font-size: 14px;
+}
+
+.tab {
+  display: flex;
+  padding: 10px;
+  align-items: center;
+  gap: 10px;
+  flex: 1 0 0;
+  align-self: stretch;
+  cursor: pointer;
+  background: #DAE3E3;
+  overflow: hidden;
+  transition: all 0.1s;
+}
+
+.tab:hover {
+  background: #e3eaea;
+}
+
+.tab.active {
+  background: #FFF;
+}
+
+.tab .icon {
+  height: 16px;
+}
+.tab .text {
+  color: #000;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.3em;
+  flex: 1 0 0;
+  max-width: calc(100% - 46px);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.tab .options {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  cursor: pointer;
+  height: 16px;
+  width: 16px;
+}
+.tab .options button {
+  background: none;
+  width: 100%;
+  height: 100%;
+}
+.tab .options button .icon {
+  width: 100%;
+  height: 100%;
+}
+.tab .options:hover button,
+.tab .options button:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0;
+}
+
+.tab .text input {
+  box-sizing: border-box;
+  border: none;
+  border-radius: none;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  font-family: inherit;
+  font-size: inherit;
+  outline-color: #F4BA00;
+}
+
+#code-editor {
+  flex: 1 0 0;
+  align-self: stretch;
+  font-size: var(--editor-font-size, 16px);
+  height: 100%;
+  overflow: hidden;
+
+}
+
+#code-editor * {
+  font-family: "CodeFont", monospace;
+}
+#code-editor .cm-editor {
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+#code-editor .cm-content {
+  padding-top: 16px;
+}
+#code-editor .cm-line {
+  padding-left: 16px;
+}
+
+#code-editor .cm-gutters {
+  background-color: #ECF1F1;
+  border-right: none;
+  width: 60px;
+  font-size: 0.875em;
+}
+
+#code-editor .cm-activeLineGutter {
+  background-color: #DAE3E3;
+}
+
+#code-editor .cm-gutter {
+  width: 75%;
+}
+#code-editor .cm-foldGutter {
+  width: 25%;
+}
+#code-editor .cm-gutterElement {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+#code-editor .cm-gutterElement span[title="Fold line"] {
+  padding-bottom: 8px;
+}
+
+#code-editor .cm-activeLine {
+  background-color: transparent;
+}
+
+.panel-container {
+  display: contents;
+}
+
+#panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  position: relative;
+  z-index: 15;
+  background: #0d1b2a;
+  overflow: hidden;
+  min-height: 0;
+  transition: height 0.5s ease, min-height 0.5s ease;
+}
+
+#panel.open {
+  min-height: 32px;
+}
+
+#panel.resizing {
+  transition: none;
+}
+
+/* Floating handle shown when the terminal panel is fully hidden.
+   Mirrors the sidebar toggle style — round, soft shadow. Anchored to
+   the viewport's bottom-right corner so it sits clear of the sidebar
+   and content regardless of layout. */
+.panel-reopen-handle {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  padding: 0;
+  z-index: 20;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+}
+.panel-reopen-handle.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.2s ease 0.4s, visibility 0s linear 0.4s;
+}
+.panel-reopen-handle:hover {
+  background: #f0f0f0;
+  color: #000;
+}
+.panel-reopen-handle .material-symbols-outlined {
+  font-size: 22px;
+}
+
+#panel.dialog-open {
+  pointer-events: none;
+}
+
+#panel #drag-handle {
+  flex-grow: 2;
+  height: 100%;
+  cursor: grab;
+  position: absolute;
+  width: 100%;
+}
+
+#panel #drag-handle:active {
+  cursor: grabbing;
+}
+
+.panel-bar {
+  display: flex;
+  height: 32px;
+  padding: 0px 10px;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  background: #0d1b2a;
+  position: relative;
+  font-size: 12px;
+  box-shadow: 0 -4px 10px -2px rgba(0, 0, 0, 0.15);
+}
+
+.panel-bar #connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+}
+
+.panel-bar #connection-status img {
+  width: 1.5em;
+  height: 1.5em;
+  filter: brightness(0) invert(1);
+}
+
+/* Icons of the small buttons on the right (copy / paste / clear / toggle)
+   — force them to white to match the rest of the panel bar. */
+.panel-bar button .icon {
+  filter: brightness(0) invert(1);
+}
+
+.panel-bar .spacer {
+  flex-grow: 1;
+}
+.panel-bar .term-operations {
+  transition: opacity 0.15s;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+}
+
+.panel-bar .term-operations.hidden {
+  opacity: 0;
+  transition-delay: 0.15s;
+  pointer-events: none;
+}
+.panel-bar .term-operations.visible {
+  opacity: 1;
+  transition-delay: 0.15s;
+}
+
+.terminal-wrapper {
+  width: 97%;
+  margin-left: 2%;
+  overflow: hidden;
+  position: absolute;
+  top: 60px; /* 45 + 15 */
+  height: calc(100% - 75px);
+}
+
+.terminal-enabled,
+.terminal-disabled {
+  width: 100%;
+}
+.terminal-disabled {
+  opacity: 0.5;
+}
+
+/* Override xterm.css default (overflow-y: scroll, always visible) so the
+   terminal's vertical scrollbar only appears when the buffer exceeds the
+   visible area. */
+.xterm .xterm-viewport {
+  overflow-y: auto;
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+  opacity: 0;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: opacity 0.15s;
+  border: none;
+  background: none;
+  font-size: 24px;
+  font-style: normal;
+  line-height: normal;
+  background: rgba(236, 241, 241, 0.50);
+  /* Sits above sidebar elements (.device-header .text::before z-index:98,
+     .sidebar-toggle z-index:5) so the backdrop properly covers them. */
+  z-index: 9999;
+}
+
+.dialog.open {
+  opacity: 1;
+  pointer-events: inherit;
+  transition: opacity 0.15s;
+}
+
+
+
+.dialog .dialog-content {
+  display: flex;
+  width: 576px;
+  padding: 36px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  background: #FFF;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.14),
+              0px 3px 1px -2px rgba(0, 0, 0, 0.12),
+              0px 1px 5px 0px rgba(0, 0, 0, 0.20);
+  transform: translateY(20px);
+  transition: transform 0.15s;
+}
+
+.dialog.open .dialog-content {
+  transform: translateY(0px);
+  transition: transform 0.15s;
+}
+
+
+.dialog .dialog-content #file-name {
+  font-size: 1.3em;
+  width:100%;
+  font-family: "CodeFont", monospace;
+}
+
+.dialog .dialog-content input:focus {
+  outline-color: #4285F4;
+}
+.dialog .dialog-content .item {
+  border-radius: 4.5px;
+  display: flex;
+  padding: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  cursor: pointer;
+}
+
+.dialog .dialog-content .item:hover {
+  background: #4285F4;
+  color: #ffffff;
+}
+
+.dialog .buttons-horizontal {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  gap: 12px;
+}
+.dialog .buttons-horizontal .item {
+  flex-basis: 50%;
+  align-items: center;
+  background-color: #eee;;
+}
+
+.dialog-title{
+  width: 100%;
+  font-size: 0.8em;
+  padding: 0;
+  margin: 0;
+  flex-basis: max-content;
+}
+
+/* ----------------------------------------------------------------------
+   New File Dialog — aligned to the AppDialog (bridges/web/dialog.js)
+   visual design: title bar with bold title + X close + bottom divider,
+   body with input, text-only action buttons (primary bold blue,
+   secondary gray). Scoped via #dialog-new-file so the legacy .dialog
+   rules above still apply to other callers.
+   ---------------------------------------------------------------------- */
+#dialog-new-file.dialog {
+  background: rgba(0, 0, 0, 0.45);
+}
+#dialog-new-file .dialog-content {
+  width: 460px;
+  padding: 0;
+  align-items: stretch;
+  gap: 0;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+#dialog-new-file .dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px 12px;
+  gap: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+#dialog-new-file .dialog-header .dialog-title {
+  width: auto;
+  flex: 1;
+  font-weight: 700;
+  font-size: 22.5px;
+  color: #111;
+  text-align: left;
+}
+#dialog-new-file .dialog-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 2px 2px 8px;
+  color: #d32f2f;
+  font-size: 30px;
+  line-height: 1;
+}
+#dialog-new-file .dialog-close:hover { color: #a10e0e; }
+#dialog-new-file .dialog-body {
+  padding: 14px 18px;
+}
+#dialog-new-file .dialog-body #file-name {
+  width: 100%;
+  font-size: 18px;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: "CodeFont", monospace;
+}
+#dialog-new-file .dialog-body #file-name:focus {
+  outline-color: #4285F4;
+}
+#dialog-new-file .dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 80px;
+  padding: 10px 18px 14px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+#dialog-new-file .dialog-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 12px;
+  font-family: inherit;
+  font-size: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #888;
+  max-width: 100%;
+  /* Override the global 45x45 button sizing so multi-character labels
+     ("컴퓨터") render on a single line. */
+  width: auto;
+  height: auto;
+  white-space: nowrap;
+}
+#dialog-new-file .dialog-actions button:hover { color: #444; }
+#dialog-new-file .dialog-actions button.dialog-action-default {
+  font-weight: 700;
+  color: #1976d2;
+}
+#dialog-new-file .dialog-actions button.dialog-action-default:hover { color: #1565c0; }
+
+.dialog-feedback {
+  font-size: 0.6em;
+  align-self: stretch;
+  padding: 0.5em;
+  background: #eee;
+}
+
+#file-manager {
+  display: flex;
+  flex-direction: column;
+  padding: 2px 10px 0 10px;
+  justify-content: center;
+  align-items: stretch;
+  gap: 6px;
+  flex: 1 0 0;
+  align-self: stretch;
+}
+
+#board-files,
+#disk-files {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  align-self: stretch;
+  width: 100%;
+  min-height: 0;
+}
+/* Board file list takes the remaining space after the disk block. */
+#board-files {
+  flex: 1 1 0;
+}
+/* Disk file list is capped to roughly 3 file rows + header so the
+   board area gets the extra vertical space. */
+#disk-files {
+  flex: 0 0 320px;
+}
+
+#file-actions {
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  height: 32px;
+  padding: 2px 0;
+  margin: 0;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+#file-actions button[disabled], #file-actions button[disabled]:hover {
+  opacity: 0.4;
+}
+
+#file-actions button .icon {
+  width: 100%;
+  height: 100%;
+}
+
+#file-actions button:hover {
+  opacity: 0.5;
+}
+
+.device-header {
+  display: flex;
+  padding: 10px 0;
+  align-items: flex-start;
+  align-self: stretch;
+  width: 100%;
+  gap: 8px;
+}
+
+.device-header button {
+  width: 32px;
+  height: auto;
+  padding: 0;
+}
+
+.device-header .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.device-header .text {
+  width: 100%;
+  height: 1.8em;
+  position: relative;
+  cursor: pointer;
+  color: #000;
+  font-family: "CodeFont", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.device-header .text span {
+  position: absolute;
+  right: 0;
+  min-width: calc(100% - 30px);
+  display: flex;
+  align-items: center;
+  padding-right: 10px;
+}
+
+
+.device-header .text::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  background: linear-gradient(0.25turn, white 25%, rgba(0, 0, 0, 0));
+  z-index: 98;
+}
+
+.file-list {
+  display: flex;
+  align-items: flex-start;
+  flex: 1 0 0;
+  align-self: stretch;
+  background: #ECF1F1;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.file-list .list {
+  display: flex;
+  padding: 6px 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 0 0;
+  align-self: stretch;
+  width: calc(100% - 40px);
+}
+
+.file-list .item {
+  display: flex;
+  height: 22px;
+  min-height: 22px;
+  max-height: 22px;
+  padding: 2px 10px;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  transition: all 0.1s;
+}
+
+.file-list .item.selected,
+.file-list .item:hover {
+  background: #FFF;
+}
+
+.file-list .item .options {
+  display: flex;
+  opacity: 0;
+  align-items: center;
+  align-self: stretch;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.file-list .item:hover .options {
+  opacity: 1;
+}
+
+.file-list .item .icon {
+  width: 32px;
+  height: 32px;
+}
+.file-list .item .text {
+  color: #000;
+  font-family: "CodeFont", monospace;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  white-space: nowrap;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3em;
+}
+
+.file-list .item .checkbox .icon.off,
+.file-list .item .checkbox .icon.on {
+  display: none;
+}
+
+.file-list .item:hover .checkbox.unchecked .icon {
+  display: none;
+}
+.file-list .item:hover .checkbox.unchecked .icon.off {
+  display: block;
+}
+
+.file-list .item .checkbox.checked .icon {
+  display: none;
+}
+.file-list .item .checkbox.checked .icon.on  {
+  display: block;
+}
+
+.file-list .item input {
+  box-sizing: border-box;
+  border: none;
+  border-radius: none;
+  height: 100%;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.5);
+  font-family: inherit;
+  font-size: inherit;
+  outline-color: #F4BA00;
+}
+
+#code-editor .cm-panels {
+  border-color: #DAE3E3;
+  padding: 0 10px;
+  margin: 0;
+}
+#code-editor .cm-panels .cm-search {
+  display: flex;
+  align-items: center;
+  height: 45px;
+  padding: 0;
+  background: #ECF1F1;
+  gap: 10px;
+}
+#code-editor .cm-panels label {
+  display: none;
+}
+#code-editor .cm-panels input,
+#code-editor .cm-panels button {
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  width: auto;
+}
+#code-editor .cm-panels button {
+  border: none;
+  border-radius: none;
+  font-family: inherit;
+  background: none;
+}
+#code-editor .cm-panels input {
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: none;
+  width: 100%;
+  background: rgba(255, 255, 255, 1.0);
+  font-family: inherit;
+  font-size: 14px;
+  outline-style: none;
+}
+#code-editor .cm-panels input:focus {
+  outline-style: solid;
+  outline-color: #F4BA00;
+
+}
+#code-editor .cm-panels [name="replace"],
+#code-editor .cm-panels [name="replace"],
+#code-editor .cm-panels [name="replaceAll"] {
+  display: none;
+}
+#code-editor .cm-panel.cm-search [name="close"] {
+  position: relative;
+}
+
+#overlay {
+  position: fixed;
+  display: flex;
+  background: transparent;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s;
+  pointer-events: none;
+  opacity: 0;
+  text-align: center;
+}
+
+#overlay.open {
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  pointer-events: all;
+  cursor: wait;
+  opacity: 1;
+}
+
+#overlay.open > * {
+  background: white;
+  padding: 1.1em 1.8em;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  font-size: 1.25rem;
+}
+
+#overlay .overlay-message {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+#overlay .overlay-spinner {
+  font-size: 1.6em;
+  line-height: 1;
+  animation: overlay-hourglass-flip 1.6s infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes overlay-hourglass-flip {
+  0%, 40%   { transform: rotate(0deg); }
+  50%, 90%  { transform: rotate(180deg); }
+  100%      { transform: rotate(360deg); }
+}
+
+/* Install Package dialog */
+#dialog-install-package.dialog {
+  /* Dark backdrop specific to this dialog. Leaves the Connection / NewFile
+     dialogs with their original light backdrop. */
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.dialog .dialog-content.install-package-dialog {
+  width: 680px;
+  max-height: 80vh;
+  flex-direction: column;
+  /* Override the .dialog .dialog-content default of align-items: center so
+     children (title, search, list, options, URL row) fill the full width. */
+  align-items: stretch;
+  gap: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Close button — absolute inside the dialog content, top-right corner */
+.install-package-dialog .dialog-close-floating {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  color: #d32f2f;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 10;
+}
+.install-package-dialog .dialog-close-floating:hover:not(:disabled) {
+  color: #a10e0e;
+}
+.install-package-dialog .dialog-close-floating:disabled {
+  color: #e7b3b3;
+  cursor: not-allowed;
+}
+.install-package-dialog .dialog-close-floating .material-symbols-outlined {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.install-package-dialog input[type="search"],
+.install-package-dialog input[type="text"] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.9em;
+}
+
+.install-package-dialog .package-list {
+  flex: 1 1 auto;
+  min-height: 160px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 4px;
+  background: #fafafa;
+}
+
+.install-package-dialog .package-empty {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 0.85em;
+}
+
+.install-package-dialog .package-item {
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.install-package-dialog .package-info {
+  flex: 1;
+  min-width: 0;
+}
+.install-package-dialog .package-item:hover {
+  background: #e8f0fe;
+}
+.install-package-dialog .package-item.selected {
+  background: #4285F4;
+  color: white;
+  border-color: #4285F4;
+}
+.install-package-dialog .package-item.selected .package-source {
+  color: #d0e6e7;
+}
+
+.install-package-dialog .package-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  align-items: center;
+}
+.install-package-dialog .package-action-btn {
+  background: transparent;
+  border: none;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+.install-package-dialog .package-action-btn:hover:not(:disabled) {
+  opacity: 0.75;
+}
+.install-package-dialog .package-action-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.install-package-dialog .package-action-btn .material-symbols-outlined {
+  font-size: 32px;
+}
+
+.install-package-dialog .package-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+.install-package-dialog .package-icon {
+  font-size: 20px;
+  color: inherit;
+  flex-shrink: 0;
+}
+.install-package-dialog .package-version {
+  font-size: 0.75em;
+  color: #888;
+  font-weight: 400;
+}
+.install-package-dialog .package-item.selected .package-version {
+  color: #d0e6e7;
+}
+.install-package-dialog .package-desc {
+  font-size: 0.8em;
+  color: #444;
+  margin-top: 2px;
+}
+.install-package-dialog .package-item.selected .package-desc {
+  color: #f0f6f6;
+}
+.install-package-dialog .package-source {
+  display: block;
+  font-size: 0.7em;
+  color: #888;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.install-package-dialog .package-detail {
+  background: #f4f8f8;
+  border: 1px solid #d5e0e0;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.82em;
+}
+.install-package-dialog .package-detail-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.install-package-dialog .package-detail-row {
+  margin-top: 2px;
+  color: #333;
+}
+.install-package-dialog .package-detail-row code {
+  background: #e6ecec;
+  padding: 1px 4px;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+.install-package-dialog .install-options {
+  display: flex;
+  gap: 18px;
+  font-size: 0.85em;
+}
+.install-package-dialog .install-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.install-package-dialog .install-option.option-disabled {
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.install-package-dialog .install-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.install-package-dialog .install-primary {
+  padding: 10px 18px;
+  background: #4285F4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+.install-package-dialog .install-primary:hover:not(:disabled) {
+  background: #2E65C9;
+}
+.install-package-dialog .install-primary:disabled {
+  background: #b5cccd;
+  cursor: not-allowed;
+}
+
+.install-package-dialog .install-error {
+  background: #fdecea;
+  color: #7a1f15;
+  border: 1px solid #f1c0ba;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.8em;
+}
+.install-package-dialog .install-progress {
+  background: #e8f1f1;
+  border: 1px solid #bfd5d5;
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 0.8em;
+  color: #225;
+}
+
+.notyf__toast.toast-board-disconnected .notyf__ripple {
+  background-color: #fff;
+}
+
+.editor-context-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 160px;
+  padding: 4px 0;
+  background: #ffffff;
+  color: #1c1c1c;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  font-family: "OpenSans", sans-serif;
+  font-size: 13px;
+  user-select: none;
+}
+.editor-context-menu__item {
+  padding: 6px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.editor-context-menu__item:hover {
+  background: #eef3fa;
+}
+.editor-context-menu__item.is-disabled {
+  color: #a0a0a0;
+  cursor: default;
+}
+.editor-context-menu__item.is-disabled:hover {
+  background: transparent;
+}
+.editor-context-menu__sep {
+  height: 1px;
+  margin: 4px 0;
+  background: #e6e6e6;
+}
+
+
+/* Floating Run/Stop button — bottom-right of the editor view. Toggles
+   icon/color via .is-running and emits the same events as the toolbar.
+   `bottom` is set inline by RunFab() so the button rides above the REPL
+   panel as it opens / closes / resizes; the value here is a fallback.
+
+   NOTE: selectors are scoped under `button.run-fab` (not just `.run-fab`)
+   to outrank the global `button:not([disabled]):hover` rule above, which
+   otherwise rewrites the FAB's border-radius and background on hover. */
+button.run-fab {
+  position: fixed;
+  right: 32px;
+  bottom: 24px;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: none;
+  background: #16a34a;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  transition: background 0.15s;
+}
+button.run-fab:hover              { background: #22c55e; border-radius: 50%; }
+button.run-fab.is-running         { background: #dc2626; border-radius: 50%; }
+button.run-fab.is-running:hover   { background: #ef4444; border-radius: 50%; }
+button.run-fab .icon {
+  width: 28px;
+  height: 28px;
+  filter: invert(1) brightness(2);
+  pointer-events: none;
+}
