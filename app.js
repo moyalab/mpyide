@@ -273,7 +273,7 @@ Are you sure you want to proceed?`,"dialog.overwrite.msgSingleBoardHeader":`You 
         <img src="media/logo.svg" alt="MicroPython for Bitblock" />
       </div>
       <div id="toolbar">
-        ${Button({icon:e.isConnected?"ms-videogame-asset.svg":"ms-videogame-asset-off.svg",label:e.isConnected?t("toolbar.disconnect"):t("toolbar.connect"),tooltip:e.isConnected?t("toolbar.tooltip.disconnect",{shortcut:`${l}+Shift+D`}):t("toolbar.tooltip.connect",{shortcut:`${l}+Shift+C`}),onClick:()=>e.isConnected?i("disconnect"):i("connect"),active:e.isConnected,first:!0})}
+        ${Button({icon:e.isConnected?"ms-usb.svg":"ms-usb-off.svg",label:e.isConnected?t("toolbar.disconnect"):t("toolbar.connect"),tooltip:e.isConnected?t("toolbar.tooltip.disconnect",{shortcut:`${l}+Shift+D`}):t("toolbar.tooltip.connect",{shortcut:`${l}+Shift+C`}),onClick:()=>e.isConnected?i("disconnect"):i("connect"),active:e.isConnected,first:!0})}
         ${Button({icon:"ms-restart.svg",label:t("toolbar.reset"),tooltip:t("toolbar.tooltip.reset",{shortcut:`${l}+Shift+R`}),disabled:!r,onClick:()=>i("reset")})}
         <div class="separator"></div>
 
